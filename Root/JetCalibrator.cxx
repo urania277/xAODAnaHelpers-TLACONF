@@ -200,6 +200,59 @@ EL::StatusCode JetCalibrator :: histInitialize ()
   // trees.  This method gets called before any input files are
   // connected.
 
+//  std::pair<uint32_t,uint32_t> thispair = std::make_pair(eventInfo->runNumber(),eventInfo->eventNumber()); m_fixEvents.insert(thispair);
+//  m_fixEvents.insert( std::make_pair(eventInfo->runNumber(),eventInfo->eventNumber()) );
+
+  m_fixEvents.insert( std::make_pair(290841588,279284) );
+  m_fixEvents.insert( std::make_pair(303306905,279345) );
+  m_fixEvents.insert( std::make_pair(705149317,279345) );
+  m_fixEvents.insert( std::make_pair(814193153,279685) );
+  m_fixEvents.insert( std::make_pair(958044900,279685) );
+  m_fixEvents.insert( std::make_pair(1350087118,279685) );
+  m_fixEvents.insert( std::make_pair(454808284,279813) );
+  m_fixEvents.insert( std::make_pair(53201949,279867) );
+  m_fixEvents.insert( std::make_pair(437713767,279867) );
+  m_fixEvents.insert( std::make_pair(1460705709,279984) );
+  m_fixEvents.insert( std::make_pair(293037621,280231) );
+  m_fixEvents.insert( std::make_pair(1503095241,280231) );
+  m_fixEvents.insert( std::make_pair(5037031,280319) );
+  m_fixEvents.insert( std::make_pair(88610690,280319) );
+  m_fixEvents.insert( std::make_pair(323157700,280319) );
+  m_fixEvents.insert( std::make_pair(584524427,280319) );
+  m_fixEvents.insert( std::make_pair(1710774724,280319) );
+  m_fixEvents.insert( std::make_pair(1784977091,280319) );
+  m_fixEvents.insert( std::make_pair(1889807679,280319) );
+  m_fixEvents.insert( std::make_pair(456607722,280423) );
+  m_fixEvents.insert( std::make_pair(642978757,280423) );
+  m_fixEvents.insert( std::make_pair(1151249857,280423) );
+  m_fixEvents.insert( std::make_pair(202017132,280464) );
+  m_fixEvents.insert( std::make_pair(630952020,280464) );
+  m_fixEvents.insert( std::make_pair(263041176,280614) );
+  m_fixEvents.insert( std::make_pair(422488120,280673) );
+  m_fixEvents.insert( std::make_pair(738174880,280673) );
+  m_fixEvents.insert( std::make_pair(752943330,280673) );
+  m_fixEvents.insert( std::make_pair(876519911,280673) );
+  m_fixEvents.insert( std::make_pair(26298971242,280673) );
+  m_fixEvents.insert( std::make_pair(30789151, 280862) );
+  m_fixEvents.insert( std::make_pair(551833265,280862) );
+  m_fixEvents.insert( std::make_pair(1087115046,280862) );
+  m_fixEvents.insert( std::make_pair(1254487794,280862) );
+  m_fixEvents.insert( std::make_pair(1863202469,280862) );
+  m_fixEvents.insert( std::make_pair(2305704129,280862) );
+  m_fixEvents.insert( std::make_pair(28352339511,280862) );
+  m_fixEvents.insert( std::make_pair(622196668,280950) );
+  m_fixEvents.insert( std::make_pair(1472816192,280950) );
+  m_fixEvents.insert( std::make_pair(2022978278,280950) );
+  m_fixEvents.insert( std::make_pair(447693598,280977) );
+  m_fixEvents.insert( std::make_pair(176457885,281074) );
+  m_fixEvents.insert( std::make_pair(230739818,281317) );
+  m_fixEvents.insert( std::make_pair(240112732,281317) );
+  m_fixEvents.insert( std::make_pair(685056004,281385) );
+  m_fixEvents.insert( std::make_pair(786818243,281385) );
+  m_fixEvents.insert( std::make_pair(1696717838,281385) );
+  m_fixEvents.insert( std::make_pair(2212268297,281385) );
+
+
   return EL::StatusCode::SUCCESS;
 }
 
@@ -277,10 +330,10 @@ EL::StatusCode JetCalibrator :: initialize ()
     //       They will be passed to the EL:;Worker automatically and can be retrieved anywhere in the EL::Algorithm
     //       I reasonably suppose everyone will use SH...
     //
-    //       IMPORTANT! the metadata name set in SH *must* be "AFII" (if not set, name will be *empty_string*) 
+    //       IMPORTANT! the metadata name set in SH *must* be "AFII" (if not set, name will be *empty_string*)
 
     //
-    const std::string stringMeta = wk()->metaData()->castString("SimulationFlavour"); 
+    const std::string stringMeta = wk()->metaData()->castString("SimulationFlavour");
     if ( m_setAFII ) {
       Info("initialize()", "Setting simulation flavour to AFII");
       m_isFullSim = false;
@@ -333,7 +386,7 @@ EL::StatusCode JetCalibrator :: initialize ()
     }
   }
 
-  // 
+  //
   // Get a list of recommended systematics for this tool
   //
   const CP::SystematicSet recSyst = CP::SystematicSet();
@@ -489,6 +542,9 @@ EL::StatusCode JetCalibrator :: execute ()
 
   m_numEvent++;
 
+  const xAOD::EventInfo* eventInfo(nullptr); //!!
+  RETURN_CHECK("BasicEventSelection::initialize()", HelperFunctions::retrieve(eventInfo, m_eventInfoContainerName, m_event, m_store, m_verbose) ,""); //!!
+
   // get the collection from TEvent or TStore
   const xAOD::JetContainer* inJets(nullptr);
   RETURN_CHECK("JetCalibrator::execute()", HelperFunctions::retrieve(inJets, m_inContainerName, m_event, m_store, m_verbose) ,"");
@@ -520,11 +576,14 @@ EL::StatusCode JetCalibrator :: execute ()
     for ( auto jet_itr : *(calibJetsSC.first) ) {
       m_numObject++;
 
+      specialChangePt(eventInfo, jet_itr); //!!
+
       if ( m_jetCalibration->applyCorrection( *jet_itr ) == CP::CorrectionCode::Error ) {
         Error("execute()", "JetCalibration tool reported a CP::CorrectionCode::Error");
         Error("execute()", "%s", m_name.c_str());
         return StatusCode::FAILURE;
       }
+//      std::cout << "ends with " << jet_itr->pt() << "," << jet_itr->eta() << "," << jet_itr->phi() << "," << jet_itr->e() << std::endl;
     }//for jets
 
     //Apply Uncertainties
@@ -692,4 +751,40 @@ EL::StatusCode JetCalibrator :: histFinalize ()
   Info("histFinalize()", "Calling histFinalize");
 
   return EL::StatusCode::SUCCESS;
+}
+
+EL::StatusCode JetCalibrator :: specialChangePt(const xAOD::EventInfo* eventInfo, xAOD::Jet* jet_itr){
+
+
+  std::pair<uint32_t,uint32_t> thispair = std::make_pair(eventInfo->eventNumber(), eventInfo->runNumber());
+  if ( m_fixEvents.find(thispair) != m_fixEvents.end() ) {
+    static SG::AuxElement::ConstAccessor< std::vector<float> > ePerSamp ("EnergyPerSampling");
+    std::vector<float> ePerSampVals = ePerSamp( *jet_itr );
+
+    float totalEnergy = 0;
+    for( int iL = 0; iL < 28; ++iL){
+      totalEnergy += ePerSampVals.at(iL);
+    }
+    float emEnergy = 0;
+    for( int iL = 0; iL < 8; ++iL){
+      emEnergy += ePerSampVals.at(iL);
+    }
+    float fracEM = emEnergy/totalEnergy;
+    std::cout << "fracEM is " << fracEM << std::endl;
+    std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! starts with " << jet_itr->pt() << "," << jet_itr->eta() << "," << jet_itr->phi() << "," << jet_itr->e() << std::endl;
+//    jet_itr->auxdata< float >("pt") = jet_itr->pt()* (1+0.4*fracEM);
+//    jet_itr->auxdata< float >("e") = jet_itr->e()* (1+0.4*fracEM);
+
+    xAOD::JetFourMom_t fourVec;
+    jet_itr->getAttribute<xAOD::JetFourMom_t>( "JetOriginConstitScaleMomentum", fourVec );
+    float newPt = fourVec.Pt() * (1+0.4*fracEM);
+    std::cout << "JetOrigin goes from " << fourVec.Pt() << " to " << newPt << std::endl;
+    fourVec.SetPt( newPt );
+//    fourVec.SetPtEtaPhiM( fourVec.Pt(), fourVec.Eta(), fourVec.Phi(), fourVec.M() );
+    jet_itr->setAttribute<xAOD::JetFourMom_t>("JetOriginConstitScaleMomentum", fourVec);
+
+  }
+
+
+return EL::StatusCode::SUCCESS;
 }

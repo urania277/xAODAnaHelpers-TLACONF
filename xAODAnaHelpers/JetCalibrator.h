@@ -17,6 +17,9 @@
 // algorithm wrapper
 #include "xAODAnaHelpers/Algorithm.h"
 
+#include <xAODJet/JetContainer.h> //!!
+#include "xAODEventInfo/EventInfo.h" //!!
+
 class JetCalibrator : public xAH::Algorithm
 {
   // put your configuration variables here as public variables.
@@ -108,6 +111,8 @@ public:
   // these are the functions not inherited from Algorithm
   virtual EL::StatusCode configure ();
 
+  std::set<std::pair<uint32_t,uint32_t> > m_fixEvents; //!!
+  EL::StatusCode specialChangePt( const xAOD::EventInfo* eventInfo, xAOD::Jet* jet_itr);
 
   // this is needed to distribute the algorithm to the workers
   ClassDef(JetCalibrator, 1);
