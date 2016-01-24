@@ -258,7 +258,7 @@ void HelpTreeBase::FillEvent( const xAOD::EventInfo* eventInfo, xAOD::TEvent* /*
 
     if ( m_isMC ) {
 
-      static SG::AuxElement::ConstAccessor< float > weight_pileup ("PileupWeight");
+      static SG::AuxElement::ConstAccessor< double > weight_pileup ("PileupWeight");
       static SG::AuxElement::ConstAccessor< float >  correct_mu("corrected_averageInteractionsPerCrossing");
       static SG::AuxElement::ConstAccessor< unsigned int > rand_run_nr("RandomRunNumber");
       static SG::AuxElement::ConstAccessor< unsigned int > rand_lumiblock_nr("RandomLumiBlockNumber");
@@ -1888,7 +1888,7 @@ void HelpTreeBase::FillJets( const xAOD::JetContainer* jets, int pvLocation, con
   if( m_thisJetInfoSwitch[jetName]->m_trackPV || m_thisJetInfoSwitch[jetName]->m_allTrack ) {
     HelperFunctions::retrieve( vertices, "PrimaryVertices", m_event, 0 );
     pvLocation = HelperFunctions::getPrimaryVertexLocation( vertices );
-    pv = vertices->at( pvLocation );
+    if(pvLocation >= 0) pv = vertices->at( pvLocation );
   }
 
   jetInfo* thisJet = m_jets[jetName];
@@ -2141,7 +2141,7 @@ void HelpTreeBase::FillJet( const xAOD::Jet* jet_itr, const xAOD::Vertex* pv, in
   }
 
     
-  if ( m_thisJetInfoSwitch[jetName]->m_trackAll || m_thisJetInfoSwitch[jetName]->m_trackPV ) {
+  if ( ( m_thisJetInfoSwitch[jetName]->m_trackAll || m_thisJetInfoSwitch[jetName]->m_trackPV ) && pvLocation >= 0 ) {
 
     // several moments calculated from all verticies
     // one accessor for each and just use appropiately in the following
@@ -2153,7 +2153,7 @@ void HelpTreeBase::FillJet( const xAOD::Jet* jet_itr, const xAOD::Vertex* pv, in
     static SG::AuxElement::ConstAccessor< std::vector<float> > trkWidth500 ("TrackWidthPt500");
     static SG::AuxElement::ConstAccessor< std::vector<float> > jvf("JVF");
 
-    if ( m_thisJetInfoSwitch[jetName]->m_trackAll ) {
+    if ( m_thisJetInfoSwitch[jetName]->m_trackAll && pvLocation >= 0 ) {
 
       std::vector<int> junkInt(1,-999);
       std::vector<float> junkFlt(1,-999);
@@ -2250,7 +2250,7 @@ void HelpTreeBase::FillJet( const xAOD::Jet* jet_itr, const xAOD::Vertex* pv, in
 
   }
 
-  if ( m_thisJetInfoSwitch[jetName]->m_allTrack ) {
+  if ( m_thisJetInfoSwitch[jetName]->m_allTrack && pvLocation >= 0 ) {
     static SG::AuxElement::ConstAccessor< int > ghostTrackCount("GhostTrackCount");
     if ( ghostTrackCount.isAvailable( *jet_itr ) ) {
       thisJet->m_jet_GhostTrackCount.push_back( ghostTrackCount( *jet_itr ) );
@@ -2302,7 +2302,7 @@ void HelpTreeBase::FillJet( const xAOD::Jet* jet_itr, const xAOD::Vertex* pv, in
 	e.  push_back( track->e()  / m_units );
 	d0. push_back( track->d0() );
 	z0. push_back( track->z0() + track->vz() - pv->z() ); // store z0 wrt PV...most useful
-	if( m_thisJetInfoSwitch[jetName]->m_allTrackDetail ) {
+	if( m_thisJetInfoSwitch[jetName]->m_allTrackDetail && pvLocation >= 0 ) {
 	  uint8_t getInt(0);
 	  // n pix, sct, trt
 	  track->summaryValue( getInt, xAOD::numberOfPixelHits );

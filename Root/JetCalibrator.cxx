@@ -68,6 +68,7 @@ JetCalibrator :: JetCalibrator (std::string className) :
   // CONFIG parameters for JetCalibrationTool
   m_jetAlgo                 = "";
   m_outputAlgo     = "";
+  m_isTrigger      = false;
 
   // when running data "_Insitu" is appended to this string
   m_calibSequence           = "JetArea_Residual_Origin_EtaJES_GSC";
@@ -265,13 +266,14 @@ EL::StatusCode JetCalibrator :: initialize ()
   m_numObject     = 0;
 
   //Insitu should not be applied to the trimmed jets, per Jet/Etmiss recommendation
-  if ( !m_isMC && m_calibSequence.find("Insitu") == std::string::npos && m_inContainerName.find("AntiKt10LCTopoTrimmedPtFrac5SmallR20") == std::string::npos) m_calibSequence += "_Insitu";
+  if ( !m_isMC && m_calibSequence.find("Insitu") == std::string::npos && m_inContainerName.find("AntiKt10LCTopoTrimmedPtFrac5SmallR20") == std::string::npos && !m_isTrigger) m_calibSequence += "_Insitu";
 
   if( m_isMC && m_calibSequence.find("Insitu") != std::string::npos){
     Error("initialize()", "Attempting to use an Insitu calibration sequence on MC.  Exiting.");
     return EL::StatusCode::FAILURE;
   }
 
+    
   if ( !m_isMC ) {
     m_calibConfig = m_calibConfigData;
   }else{
@@ -318,6 +320,9 @@ EL::StatusCode JetCalibrator :: initialize ()
     std::string jc_tool_name = std::string("JetCleaning_") + m_name;
     m_jetCleaning = new JetCleaningTool( jc_tool_name.c_str() );
     RETURN_CHECK( "JetCalibrator::initialize()", m_jetCleaning->setProperty( "CutLevel", m_jetCleanCutLevel), "");
+    if (m_isTrigger){
+          RETURN_CHECK( "JetCalibrator::initialize()", m_jetCleaning->setProperty( "DoCHF", false), "");
+    }
     if (m_jetCleanUgly){
       RETURN_CHECK( "JetCalibrator::initialize()", m_jetCleaning->setProperty( "DoUgly", true), "");
     }
@@ -330,16 +335,22 @@ EL::StatusCode JetCalibrator :: initialize ()
       m_decisionNames.push_back( "TightBad" );
       m_decisionNames.push_back( "TightBadUgly" );
       for(unsigned int i=0; i < m_decisionNames.size() ; ++i){
+          
         m_allJetCleaningTools.push_back( new JetCleaningTool((jc_tool_name+"_pass"+m_decisionNames.at(i)).c_str()) );
+          
+        if (m_isTrigger){
+          RETURN_CHECK( "JetCalibrator::initialize()", m_allJetCleaningTools.at( i )->setProperty( "DoCHF", false), "");
+        }
+  
         if( m_decisionNames.at(i).find("Ugly") != std::string::npos ){
-          std::cout << "adding for " << m_decisionNames.at(i).substr(0,m_decisionNames.at(i).size()-4) << std::endl;
+          //std::cout << "adding ugly cut for " << m_decisionNames.at(i).substr(0,m_decisionNames.at(i).size()-4) << std::endl;
           RETURN_CHECK( "JetCalibrator::initialize()", m_allJetCleaningTools.at( i )->setProperty( "CutLevel", m_decisionNames.at(i).substr(0,m_decisionNames.at(i).size()-4) ), "");
           RETURN_CHECK( "JetCalibrator::initialize()", m_allJetCleaningTools.at( i )->setProperty( "DoUgly", true ), "");
         }else{
           RETURN_CHECK( "JetCalibrator::initialize()", m_allJetCleaningTools.at( i )->setProperty( "CutLevel", m_decisionNames.at(i)), "");
         }
         RETURN_CHECK( "JetCalibrator::initialize()", m_allJetCleaningTools.at( i )->initialize(), ("JetCleaning Interface "+m_decisionNames.at(i)+" succesfully initialized!").c_str());
-      }
+      }//end loop on decision names
     }
   }
 
