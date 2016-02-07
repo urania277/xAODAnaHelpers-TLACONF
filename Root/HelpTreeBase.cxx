@@ -254,7 +254,9 @@ void HelpTreeBase::FillEvent( const xAOD::EventInfo* eventInfo, xAOD::TEvent* /*
     }
 
     m_actualMu  = eventInfo->actualInteractionsPerCrossing();
+      //std::cout << m_actualMu << std::endl;
     m_averageMu = eventInfo->averageInteractionsPerCrossing();
+      //std::cout << m_averageMu << std::endl;
 
     if ( m_isMC ) {
 
@@ -2046,17 +2048,29 @@ void HelpTreeBase::FillJet( const xAOD::Jet* jet_itr, const xAOD::Vertex* pv, in
     static SG::AuxElement::ConstAccessor<float> leadClusSecondR ("LeadingClusterSecondR");
     safeFill<float, float>(jet_itr, leadClusSecondR, thisJet->m_jet_LeadingClusterSecondR, -999);
 
-    static SG::AuxElement::ConstAccessor<char> clean_passLooseBad ("clean_passLooseBad");
+    static SG::AuxElement::ConstAccessor<int> clean_passLooseBad ("clean_passLooseBad");
+    safeFill<int, int>(jet_itr, clean_passLooseBad, thisJet->m_jet_clean_passLooseBad, -999);
+       
+    static SG::AuxElement::ConstAccessor<int> clean_passLooseBadUgly ("clean_passLooseBadUgly");
+    safeFill<int, int>(jet_itr, clean_passLooseBadUgly, thisJet->m_jet_clean_passLooseBadUgly, -999);
+       
+    static SG::AuxElement::ConstAccessor<int> clean_passTightBad ("clean_passTightBad");
+    safeFill<int, int>(jet_itr, clean_passTightBad, thisJet->m_jet_clean_passTightBad, -999);
+       
+    static SG::AuxElement::ConstAccessor<int> clean_passTightBadUgly ("clean_passTightBadUgly");
+    safeFill<int, int>(jet_itr, clean_passTightBadUgly, thisJet->m_jet_clean_passTightBadUgly, -999);
+
+/*    static SG::AuxElement::ConstAccessor<int> clean_passLooseBad ("clean_passLooseBad");
     safeFill<char, int>(jet_itr, clean_passLooseBad, thisJet->m_jet_clean_passLooseBad, -999);
 
-    static SG::AuxElement::ConstAccessor<char> clean_passLooseBadUgly ("clean_passLooseBadUgly");
+    static SG::AuxElement::ConstAccessor<int> clean_passLooseBadUgly ("clean_passLooseBadUgly");
     safeFill<char, int>(jet_itr, clean_passLooseBadUgly, thisJet->m_jet_clean_passLooseBadUgly, -999);
 
-    static SG::AuxElement::ConstAccessor<char> clean_passTightBad ("clean_passTightBad");
+    static SG::AuxElement::ConstAccessor<int> clean_passTightBad ("clean_passTightBad");
     safeFill<char, int>(jet_itr, clean_passTightBad, thisJet->m_jet_clean_passTightBad, -999);
 
-    static SG::AuxElement::ConstAccessor<char> clean_passTightBadUgly ("clean_passTightBadUgly");
-    safeFill<char, int>(jet_itr, clean_passTightBadUgly, thisJet->m_jet_clean_passTightBadUgly, -999);
+    static SG::AuxElement::ConstAccessor<int> clean_passTightBadUgly ("clean_passTightBadUgly");
+    safeFill<char, int>(jet_itr, clean_passTightBadUgly, thisJet->m_jet_clean_passTightBadUgly, -999);*/
 
   } // clean
 

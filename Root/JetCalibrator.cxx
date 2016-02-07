@@ -620,14 +620,17 @@ EL::StatusCode JetCalibrator :: execute ()
 
         if( m_saveAllCleanDecisions ){
           for(unsigned int i=0; i < m_allJetCleaningTools.size() ; ++i){
-            jet_itr->auxdata< char >(("clean_pass"+m_decisionNames.at(i)).c_str()) = m_allJetCleaningTools.at(i)->accept(*jetToClean);
+            jet_itr->auxdata< int >(("clean_pass"+m_decisionNames.at(i)).c_str()) = static_cast<int> (m_allJetCleaningTools.at(i)->accept(*jetToClean));
           }
         }
       } //end cleaning decision
     }
 
-    if ( !xAOD::setOriginalObjectLink(*inJets, *(calibJetsSC.first)) ) {
-      Error("execute()  ", "Failed to set original object links -- MET rebuilding cannot proceed.");
+    //don't rebuild MET if trigger jets
+    if (!m_isTrigger) {
+      if ( !xAOD::setOriginalObjectLink(*inJets, *(calibJetsSC.first)) ) {
+        Error("execute()  ", "Failed to set original object links -- MET rebuilding cannot proceed.");
+      }
     }
 
     // Recalculate JVT using calibrated Jets
