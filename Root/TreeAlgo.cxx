@@ -29,6 +29,7 @@ TreeAlgo :: TreeAlgo (std::string className) :
 
   m_evtDetailStr            = "";
   m_trigDetailStr           = "";
+  m_RoIDetailStr        = "";
   m_trigJetDetailStr        = "";
   m_truthJetDetailStr       = "";
   m_muDetailStr             = "";
@@ -117,6 +118,7 @@ EL::StatusCode TreeAlgo :: treeInitialize ()
   m_helpTree->AddEvent( m_evtDetailStr );
 
   if ( !m_trigDetailStr.empty() )       {   m_helpTree->AddTrigger    (m_trigDetailStr);    }
+  if ( !m_RoIDetailStr.empty() )        {   m_helpTree->AddRoI    (m_RoIDetailStr);    }
   if ( !m_muContainerName.empty() )     {   m_helpTree->AddMuons      (m_muDetailStr);      }
   if ( !m_elContainerName.empty() )     {   m_helpTree->AddElectrons  (m_elDetailStr);      }
   if ( !m_jetContainerName.empty() )    {   m_helpTree->AddJets       (m_jetDetailStr, "jet");     }
@@ -202,9 +204,11 @@ EL::StatusCode TreeAlgo :: execute ()
   }
 
   // Fill jet trigger information - this can be used if with layer/cleaning info we need to turn off some variables?
-  /*if ( !m_trigJetDetailStr.empty() ) {
-    m_helpTree->FillJetTrigger();
-  }*/
+  if ( !m_RoIDetailStr.empty() ) {
+     const xAOD::JetRoIContainer* inLVL1JetROIs;
+     RETURN_CHECK("TreeAlgo::execute()", HelperFunctions::retrieve(inLVL1JetROIs, "LVL1JetRoIs", m_event, m_store, m_verbose) ,"");
+      m_helpTree->FillRoI(inLVL1JetROIs);
+  }
 
   // for the containers the were supplied, fill the appropriate vectors
   if ( !m_muContainerName.empty() ) {

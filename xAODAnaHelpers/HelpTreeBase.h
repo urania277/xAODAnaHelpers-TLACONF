@@ -26,6 +26,7 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTau/TauJetContainer.h"
 #include "xAODMissingET/MissingETContainer.h"
+#include "xAODTrigger/JetRoIContainer.h"
 
 #include "xAODAnaHelpers/HelperClasses.h"
 #include "xAODRootAccess/TEvent.h"
@@ -55,7 +56,7 @@ public:
 
   void AddEvent       (const std::string detailStr = "");
   void AddTrigger     (const std::string detailStr = "");
-  void AddJetTrigger  (const std::string detailStr = "");
+  void AddRoI         (const std::string detailStr = "");
   void AddMuons       (const std::string detailStr = "");
   void AddElectrons   (const std::string detailStr = "");
   void AddPhotons     (const std::string detailStr = "");
@@ -71,7 +72,7 @@ public:
   // control which branches are filled
   HelperClasses::EventInfoSwitch*      m_eventInfoSwitch;
   HelperClasses::TriggerInfoSwitch*    m_trigInfoSwitch;
-  HelperClasses::JetTriggerInfoSwitch* m_jetTrigInfoSwitch;
+  HelperClasses::RoIInfoSwitch* m_RoIInfoSwitch;
   HelperClasses::MuonInfoSwitch*       m_muInfoSwitch;
   HelperClasses::ElectronInfoSwitch*   m_elInfoSwitch;
   HelperClasses::PhotonInfoSwitch*     m_phInfoSwitch;
@@ -90,7 +91,7 @@ public:
   void FillEvent( const xAOD::EventInfo* eventInfo, xAOD::TEvent* event = nullptr );
 
   void FillTrigger( const xAOD::EventInfo* eventInfo );
-  void FillJetTrigger();
+  void FillRoI( const xAOD::JetRoIContainer* LVL1JetROIs );
   void FillMuons( const xAOD::MuonContainer* muons, const xAOD::Vertex* primaryVertex );
   void FillElectrons( const xAOD::ElectronContainer* electrons, const xAOD::Vertex* primaryVertex );
   void FillPhotons( const xAOD::PhotonContainer* photons );
@@ -106,7 +107,7 @@ public:
   void Fill();
   void ClearEvent();
   void ClearTrigger();
-  void ClearJetTrigger();
+  void ClearRoI();
   void ClearMuons();
   void ClearElectrons();
   void ClearPhotons();
@@ -123,7 +124,7 @@ public:
     return;
   };
   virtual void AddTriggerUser(const std::string detailStr = "")      {
-    if(m_debug) Info("AddTriggerUser","Empty function called from HelpTreeBase %s",detailStr.c_str());
+    Info("AddTriggerUser","Empty function called from HelpTreeBase %s",detailStr.c_str());
     return;
   };
   virtual void AddJetTriggerUser(const std::string detailStr = "")      {
@@ -281,8 +282,12 @@ protected:
   std::vector<std::string> m_passTriggers;
   std::vector<float> m_triggerPrescales;
 
-  // jet trigger
-
+  // RoI
+  std::vector<float> m_LVL1JetROIs_et8x8;
+  std::vector<float> m_LVL1JetROIs_eta;
+  std::vector<float> m_LVL1JetROIs_phi;
+  
+    
   //
   // jet Info
   //

@@ -28,6 +28,7 @@
 HelpTreeBase::HelpTreeBase(xAOD::TEvent* event, TTree* tree, TFile* file, const float units, bool debug, bool DC14, xAOD::TStore* store):
   m_eventInfoSwitch(nullptr),
   m_trigInfoSwitch(nullptr),
+  m_RoIInfoSwitch(nullptr),
   m_muInfoSwitch(nullptr),
   m_elInfoSwitch(nullptr),
   m_phInfoSwitch(nullptr),
@@ -66,6 +67,7 @@ HelpTreeBase::~HelpTreeBase() {
     
     //trig
     delete m_trigInfoSwitch;
+    delete m_RoIInfoSwitch;
     
     //mu
     delete m_muInfoSwitch;
@@ -419,7 +421,7 @@ void HelpTreeBase::AddTrigger( const std::string detailStr ) {
     m_tree->Branch("triggerPrescales",      &m_triggerPrescales    );
   }
 
-  //this->AddTriggerUser();
+  this->AddTriggerUser();
 }
 
 // Fill the information in the trigger branches
@@ -476,6 +478,8 @@ void HelpTreeBase::FillTrigger( const xAOD::EventInfo* eventInfo ) {
     if( trigPrescales.isAvailable( *eventInfo ) ) { m_triggerPrescales = trigPrescales( *eventInfo ); }
   }
 
+  //this->FillTriggerUser();
+
 }
 
 // Clear Trigger
@@ -490,6 +494,9 @@ void HelpTreeBase::ClearTrigger() {
 
   m_passTriggers.clear();
   m_triggerPrescales.clear();
+    
+  this->ClearTriggerUser();
+
 
 }
 
@@ -500,13 +507,50 @@ void HelpTreeBase::ClearTrigger() {
  ********************/
 
 /* TODO: jet trigger */
-//CD: is this useful at all?
-void HelpTreeBase::AddJetTrigger( const std::string detailStr )
+void HelpTreeBase::AddRoI( const std::string detailStr )
 {
-  if ( m_debug )  Info("AddJetTrigger()", "Adding jet trigger variables: %s", detailStr.c_str());
+  if ( m_debug )  Info("AddRoI()", "Adding RoI trigger variables: %s", detailStr.c_str());
+   
+    m_RoIInfoSwitch = new HelperClasses::RoIInfoSwitch( detailStr );
+
+    if ( m_RoIInfoSwitch->m_RoI){
+        m_tree->Branch("LVL1JetROIs_et8x8",  &m_LVL1JetROIs_et8x8);
+        m_tree->Branch("LVL1JetROIs_eta", &m_LVL1JetROIs_eta);
+        m_tree->Branch("LVL1JetROIs_phi", &m_LVL1JetROIs_phi);
+
+    }
+ 
 }
-void HelpTreeBase::FillJetTrigger(  ) { }
-void HelpTreeBase::ClearJetTrigger(  ) { }
+
+void HelpTreeBase::FillRoI(  const xAOD::JetRoIContainer* LVL1JetROIs ) {
+
+  if ( m_debug )  Info("FillRoI()", "Filling RoI trigger variables");
+  this->ClearRoI();
+    
+  for ( auto RoI_itr : *(LVL1JetROIs) ) {
+    
+      std::cout << (RoI_itr)->et8x8() << std::endl;
+    if ( m_RoIInfoSwitch->m_RoI ) {
+      m_LVL1JetROIs_et8x8.push_back ( (RoI_itr)->et8x8() / m_units );
+      m_LVL1JetROIs_eta.push_back( (RoI_itr)->eta() );
+      m_LVL1JetROIs_phi.push_back( (RoI_itr)->phi() );
+    }
+    
+  }
+    
+}
+    
+void HelpTreeBase::ClearRoI(  ) {
+
+  if ( m_debug )  Info("ClearRoI()", "Clearing RoI trigger variables");
+
+    if ( m_RoIInfoSwitch->m_RoI ) {
+        m_LVL1JetROIs_et8x8.clear();
+        m_LVL1JetROIs_eta.clear();
+        m_LVL1JetROIs_phi.clear();
+    }
+
+}
 
 
 /*********************

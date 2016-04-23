@@ -99,7 +99,8 @@ namespace HelperClasses{
     m_passTriggers      = has_exact("passTriggers");
   }
 
-  void JetTriggerInfoSwitch::initialize(){
+  void RoIInfoSwitch::initialize(){
+    m_RoI           = has_exact("RoI");
     m_kinematic     = has_exact("kinematic");
     m_clean         = has_exact("clean");
   }

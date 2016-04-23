@@ -19,6 +19,7 @@ public:
   // holds bools that control which branches are filled
   std::string m_evtDetailStr;
   std::string m_trigDetailStr;
+  std::string m_RoIDetailStr;
   std::string m_trigJetDetailStr;
   std::string m_muDetailStr;
   std::string m_elDetailStr;

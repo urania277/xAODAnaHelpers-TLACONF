@@ -174,21 +174,23 @@ namespace HelperClasses {
 
   /**
     @rst
-        The :cpp:class:`HelperClasses::InfoSwitch` struct for Jet Trigger Information.
+        The :cpp:class:`HelperClasses::InfoSwitch` struct for RoI Information.
 
         ============== ============ =======
         Parameter      Pattern      Match
         ============== ============ =======
+        m_RoI          RoI          exact
         m_kinematic    kinematic    exact
         m_clean        clean        exact
         ============== ============ =======
     @endrst
    */
-  struct JetTriggerInfoSwitch : InfoSwitch {
+  struct RoIInfoSwitch : InfoSwitch {
+    bool m_RoI;
     bool m_kinematic;
     bool m_clean;
     void initialize();
-    JetTriggerInfoSwitch(const std::string configStr) : InfoSwitch(configStr) { initialize(); };
+    RoIInfoSwitch(const std::string configStr) : InfoSwitch(configStr) { initialize(); };
   };
 
   /**
